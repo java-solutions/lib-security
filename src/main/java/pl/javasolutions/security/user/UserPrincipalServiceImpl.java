@@ -18,7 +18,7 @@ class UserPrincipalServiceImpl implements UserPrincipalService {
     private final UserRepository userRepository;
 
     @Override
-    public UserPrincipal loadUser(final ProviderUserInfo<?> providerUserInfo) {
+    public UserPrincipal loadUser(ProviderUserInfo<?> providerUserInfo) {
         ProviderUserInfoValidator.validateUserInfo(providerUserInfo);
         Optional<UserDetails> userDetails = userRepository.findByEmail(providerUserInfo.getEmail());
 

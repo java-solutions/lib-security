@@ -1,24 +1,29 @@
 package pl.javasolutions.security.jwt;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier.BaseVerification;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
+import pl.javasolutions.security.ClockRepository;
 import pl.javasolutions.security.SecurityConfigurationProperties;
 import pl.javasolutions.security.oauth2.userInfo.ProviderUserInfo;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
@@ -33,6 +38,7 @@ class JwtTokenService implements TokenService {
     private final static String DEFAULT_CLAIMS_LOCALE = "pl";
 
     private final SecurityConfigurationProperties.TokenProperties tokenProperties;
+    private final ClockRepository clockRepository;
 
     @Override
     public OidcIdToken createToken(final ProviderUserInfo<?> userInfo) {
@@ -41,14 +47,16 @@ class JwtTokenService implements TokenService {
 
     @Override
     public OidcIdToken createToken(ProviderUserInfo<?> userInfo, UserDetails userDetails) {
-        Algorithm algorithm = Algorithm.HMAC512(tokenProperties.getSecret());
+        byte[] secret = Base64.getDecoder().decode(tokenProperties.getSecret());
+        Algorithm algorithm = Algorithm.HMAC512(secret);
         Map<String, Object> claims = createClaims(userInfo, userDetails);
+        LocalDateTime now = clockRepository.now();
 
         String token = JWT.create()
                 .withIssuer(tokenProperties.getIssuer())
                 .withSubject(userInfo.getSubject())
-                .withIssuedAt(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())
-                .withExpiresAt(LocalDateTime.now().plusHours(1).atZone(ZoneId.systemDefault()).toInstant())
+                .withIssuedAt(now.toInstant(ZoneOffset.UTC))
+                .withExpiresAt(now.plusHours(1).toInstant(ZoneOffset.UTC))
                 .withPayload(claims)
                 .sign(algorithm);
 
@@ -58,10 +66,13 @@ class JwtTokenService implements TokenService {
     @Override
     public Jwt decode(final String token) {
         try {
-            Algorithm algorithm = Algorithm.HMAC512(tokenProperties.getSecret());
-            DecodedJWT decodedToken = JWT.require(algorithm)
-                    .withIssuer(tokenProperties.getIssuer())
-                    .build().verify(token);
+            byte[] secret = Base64.getDecoder().decode(tokenProperties.getSecret());
+            Algorithm algorithm = Algorithm.HMAC512(secret);
+            BaseVerification verification = (BaseVerification) JWT.require(algorithm)
+                    .withIssuer(tokenProperties.getIssuer());
+
+            DecodedJWT decodedToken = verification.build(clockRepository.getCurrentClock().withZone(ZoneOffset.UTC))
+                    .verify(token);
 
             return Jwt.withTokenValue(token)
                     .header("alg", decodedToken.getToken())
@@ -107,7 +118,10 @@ class JwtTokenService implements TokenService {
 
         if (nonNull(userDetails)) {
             claims.put(StandardClaimNames.SUB, userDetails.getUsername());
-            claims.put(CLAIMS_ROLES_KEY, userDetails.getAuthorities());
+            claims.put(CLAIMS_ROLES_KEY, userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList())
+            );
         }
 
         return claims;

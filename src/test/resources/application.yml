@@ -1,0 +1,14 @@
+# TODO: zmiana application.yml na inny plik.
+js:
+  app:
+    security:
+      token:
+        secret: secret-test
+        issuer: test-issuer
+        role-prefix: GRANTED_ROLE
+        default-roles:
+          - test
+          - default
+      oauth2:
+        redirect-url: http://localhost:8081
+        token-param: test

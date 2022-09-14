@@ -11,7 +11,7 @@ import static lombok.AccessLevel.PROTECTED;
 class DefaultUserRepository implements UserRepository {
 
     @Override
-    public Optional<UserDetails> findByEmail(final String email) {
+    public Optional<UserDetails> findByEmail(String email) {
         return Optional.empty();
     }
 }

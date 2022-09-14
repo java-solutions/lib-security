@@ -35,6 +35,7 @@ import pl.javasolutions.security.user.UserPrincipalService;
 @EnableConfigurationProperties(SecurityConfigurationProperties.class)
 @Import({UserPrincipalBeanConfiguration.class, SecurityTokenBeanConfiguration.class})
 // FIXME: SpringFacetCodeInspection
+@SuppressWarnings("SpringFacetCodeInspection")
 class SecurityConfiguration {
 
     @Bean
