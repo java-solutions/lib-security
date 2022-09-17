@@ -14,17 +14,16 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
-import pl.javasolutions.security.ClockRepository;
 import pl.javasolutions.security.SecurityConfigurationProperties;
 import pl.javasolutions.security.oauth2.userInfo.ProviderUserInfo;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Clock;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.time.temporal.ChronoUnit.HOURS;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
@@ -38,7 +37,7 @@ class JwtTokenService implements TokenService {
     private final static String DEFAULT_CLAIMS_LOCALE = "pl";
 
     private final SecurityConfigurationProperties.TokenProperties tokenProperties;
-    private final ClockRepository clockRepository;
+    private final Clock clock;
 
     @Override
     public OidcIdToken createToken(final ProviderUserInfo<?> userInfo) {
@@ -50,13 +49,12 @@ class JwtTokenService implements TokenService {
         byte[] secret = Base64.getDecoder().decode(tokenProperties.getSecret());
         Algorithm algorithm = Algorithm.HMAC512(secret);
         Map<String, Object> claims = createClaims(userInfo, userDetails);
-        LocalDateTime now = clockRepository.now();
 
         String token = JWT.create()
                 .withIssuer(tokenProperties.getIssuer())
                 .withSubject(userInfo.getSubject())
-                .withIssuedAt(now.toInstant(ZoneOffset.UTC))
-                .withExpiresAt(now.plusHours(1).toInstant(ZoneOffset.UTC))
+                .withIssuedAt(clock.instant())
+                .withExpiresAt(clock.instant().plus(1, HOURS))
                 .withPayload(claims)
                 .sign(algorithm);
 
@@ -71,7 +69,7 @@ class JwtTokenService implements TokenService {
             BaseVerification verification = (BaseVerification) JWT.require(algorithm)
                     .withIssuer(tokenProperties.getIssuer());
 
-            DecodedJWT decodedToken = verification.build(clockRepository.getCurrentClock().withZone(ZoneOffset.UTC))
+            DecodedJWT decodedToken = verification.build(clock)
                     .verify(token);
 
             return Jwt.withTokenValue(token)

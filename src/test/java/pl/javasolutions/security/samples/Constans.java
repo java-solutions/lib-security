@@ -24,5 +24,4 @@ public class Constans {
 
     public static final ZonedDateTime DEFAULT_TOKEN_CREATE_DATE = LocalDateTime.of(2018, 1, 13, 1, 30, 22).atZone(ZoneId.of("GMT"));
     public static final ZonedDateTime DEFAULT_TOKEN_EXPIRATION_DATE = LocalDateTime.of(2018, 1, 13, 2, 30, 22).atZone(ZoneId.of("GMT"));
-    public static final ZonedDateTime DEFAULT_DATE = LocalDateTime.of(2018, 1, 13, 1, 33, 12).atZone(ZoneId.of("GMT"));
 }

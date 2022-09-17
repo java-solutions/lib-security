@@ -8,10 +8,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.jwt.Jwt;
+import pl.javasolutions.security.config.TestPropertiesConfiguration;
 import pl.javasolutions.security.oauth2.userInfo.ProviderUserInfo;
 
+import java.time.Clock;
+import java.time.ZoneId;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,18 +26,19 @@ import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.L
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.NAME;
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.PICTURE;
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
-import static pl.javasolutions.security.samples.Constans.DEFAULT_JWT_TOKEN;
-import static pl.javasolutions.security.samples.Constans.DEFAULT_JWT_TOKEN_WITH_DETAILS;
-import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_ISSUER;
-import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_TEST_ROLE;
-import static pl.javasolutions.security.samples.SampleUser.DEFAULT_USER_DETAILS;
 import static pl.javasolutions.security.jwt.SampleJwtToken.DEFAULT_JWT;
 import static pl.javasolutions.security.jwt.SampleJwtToken.DEFAULT_JWT_DETAILS;
 import static pl.javasolutions.security.jwt.TokenService.CLAIMS_ROLES_KEY;
 import static pl.javasolutions.security.oauth2.userInfo.SampleProviderGoogleUserInfo.DEFAULT_GOOGLE_OAUTH2_USER;
 import static pl.javasolutions.security.oauth2.userInfo.SampleProviderGoogleUserInfo.DEFAULT_GOOGLE_OIDC_USER;
+import static pl.javasolutions.security.samples.Constans.DEFAULT_JWT_TOKEN;
+import static pl.javasolutions.security.samples.Constans.DEFAULT_JWT_TOKEN_WITH_DETAILS;
+import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_CREATE_DATE;
+import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_ISSUER;
+import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_TEST_ROLE;
+import static pl.javasolutions.security.samples.SampleUser.DEFAULT_USER_DETAILS;
 
-@SpringBootTest(classes = {JwtTestConfiguration.class})
+@SpringBootTest(classes = {JwtTokenServiceTest.TestClockConfiguration.class, SecurityTokenBeanConfiguration.class, TestPropertiesConfiguration.class})
 @DisplayName("jwt token service test")
 class JwtTokenServiceTest {
 
@@ -109,4 +115,12 @@ class JwtTokenServiceTest {
         );
     }
 
+    @TestConfiguration
+    static class TestClockConfiguration {
+
+        @Bean
+        Clock defaultClock() {
+            return Clock.fixed(DEFAULT_TOKEN_CREATE_DATE.toInstant(), ZoneId.systemDefault());
+        }
+    }
 }

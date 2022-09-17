@@ -8,18 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import pl.javasolutions.security.config.TestPropertiesConfiguration;
 
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_DEFAULT_AUTHORITY_ROLE;
-import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_TEST_AUTHORITY_ROLE;
 import static pl.javasolutions.security.jwt.SampleJwtToken.DEFAULT_JWT;
 import static pl.javasolutions.security.jwt.SampleJwtToken.DEFAULT_JWT_DETAILS;
+import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_DEFAULT_AUTHORITY_ROLE;
+import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_TEST_AUTHORITY_ROLE;
 
-@SpringBootTest(classes = JwtTestConfiguration.class)
+@SpringBootTest(classes = {SecurityTokenBeanConfiguration.class, TestPropertiesConfiguration.class})
 @DisplayName("jwt authentication converter tests")
 class JwtAuthenticationConverterTest {
 
