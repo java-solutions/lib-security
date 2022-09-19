@@ -1,7 +1,6 @@
 package pl.javasolutions.security.user;
 
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Optional;
 

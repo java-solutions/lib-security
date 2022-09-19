@@ -4,7 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -51,6 +52,7 @@ public class UserPrincipal implements OidcUser {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return getUserDetails().map(UserDetails::getAuthorities)
+                .map(authorities -> authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet()))
                 .orElseGet(HashSet::new);
     }
 

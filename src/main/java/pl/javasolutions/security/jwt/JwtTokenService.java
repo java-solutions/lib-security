@@ -8,20 +8,18 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import pl.javasolutions.security.SecurityConfigurationProperties;
 import pl.javasolutions.security.oauth2.userInfo.ProviderUserInfo;
+import pl.javasolutions.security.user.UserDetails;
 
 import java.time.Clock;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.util.Objects.nonNull;
@@ -115,11 +113,8 @@ class JwtTokenService implements TokenService {
         }
 
         if (nonNull(userDetails)) {
-            claims.put(StandardClaimNames.SUB, userDetails.getUsername());
-            claims.put(CLAIMS_ROLES_KEY, userDetails.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList())
-            );
+            claims.put(StandardClaimNames.SUB, userDetails.getId());
+            claims.put(CLAIMS_ROLES_KEY, userDetails.getAuthorities());
         }
 
         return claims;

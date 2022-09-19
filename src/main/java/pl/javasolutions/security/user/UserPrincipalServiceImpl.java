@@ -1,7 +1,6 @@
 package pl.javasolutions.security.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import pl.javasolutions.security.jwt.TokenService;
 import pl.javasolutions.security.oauth2.userInfo.ProviderUserInfo;

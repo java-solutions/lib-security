@@ -2,8 +2,6 @@ package pl.javasolutions.security.samples;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
@@ -11,8 +9,8 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import pl.javasolutions.security.user.UserDetails;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +19,6 @@ import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_CREATE_DA
 import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_EXPIRATION_DATE;
 import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_ISSUER;
 import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_TEST_ROLE;
-import static pl.javasolutions.security.samples.Constans.DEFAULT_USER_DETAILS_USERNAME;
 import static pl.javasolutions.security.samples.Constans.DEFAULT_USER_EMAIL;
 import static pl.javasolutions.security.samples.Constans.DEFAULT_USER_FULL_NAME;
 import static pl.javasolutions.security.samples.Constans.DEFAULT_USER_ID;
@@ -56,8 +53,7 @@ public class SampleUser {
     }
 
     private static UserDetails createDefaultUserDetails() {
-        Collection<? extends GrantedAuthority> authorities = createDefaultGrantedAuthorities();
-        return new User(DEFAULT_USER_DETAILS_USERNAME, "NIEWAZNE", true, true, true, true, authorities);
+        return new DefaultUserDetails(DEFAULT_USER_ID, List.of(DEFAULT_TOKEN_TEST_ROLE));
     }
 
     static List<GrantedAuthority> createDefaultGrantedAuthorities() {
