@@ -16,7 +16,6 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,6 +25,7 @@ import org.springframework.security.web.context.NullSecurityContextRepository;
 import pl.javasolutions.security.SecurityConfigurationProperties;
 import pl.javasolutions.security.jwt.SecurityTokenBeanConfiguration;
 import pl.javasolutions.security.jwt.TokenService;
+import pl.javasolutions.security.jwt.UserDetailsAuthenticationToken;
 import pl.javasolutions.security.user.UserPrincipalBeanConfiguration;
 import pl.javasolutions.security.user.UserPrincipalService;
 
@@ -44,7 +44,7 @@ class SecurityConfiguration {
             SecurityConfigurationProperties properties,
             TokenService tokenService,
             UserPrincipalService providerUserInfoService,
-            Converter<Jwt, JwtAuthenticationToken> jwtAuthenticationTokenConverter
+            Converter<Jwt, UserDetailsAuthenticationToken> jwtAuthenticationTokenConverter
     ) throws Exception {
         log.info("Initialized oauth login security and jwt resource server");
         return http

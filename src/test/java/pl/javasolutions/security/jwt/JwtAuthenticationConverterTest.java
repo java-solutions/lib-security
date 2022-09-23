@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import pl.javasolutions.security.config.TestPropertiesConfiguration;
 
 import java.util.stream.Stream;
@@ -31,15 +30,15 @@ class JwtAuthenticationConverterTest {
     @MethodSource("tokens")
     @DisplayName("should convert default jwt to jwt authentication token")
     void shouldConvertJwtToJwtAuthenticationToken(Jwt token, String authorityName) {
-        JwtAuthenticationToken convertedToken = sub.convert(token);
+        UserDetailsAuthenticationToken convertedToken = sub.convert(token);
 
         assertNotNull(convertedToken, "converter cannot be null");
-        assertEquals(convertedToken.getToken(), token, "token source must be the same");
-        assertEquals(convertedToken.getName(), token.getSubject(), "subject must be the same");
+        assertEquals(token.getSubject(), convertedToken.getName(), "subject must be the same");
         assertNotNull(convertedToken.getAuthorities(), "authorities should be not null");
-        assertEquals(convertedToken.getAuthorities().size(), 1, "authorities should have one authority");
+        assertEquals(1, convertedToken.getAuthorities().size(), "authorities should have one authority");
         assertTrue(convertedToken.getAuthorities().stream().findFirst().isPresent());
-        assertEquals(convertedToken.getAuthorities().stream().findFirst().get().getAuthority(), authorityName);
+        assertEquals(authorityName, convertedToken.getAuthorities().stream().findFirst().get().getAuthority());
+        assertTrue(convertedToken.isAuthenticated(), "token should be authenticated");
 
     }
 

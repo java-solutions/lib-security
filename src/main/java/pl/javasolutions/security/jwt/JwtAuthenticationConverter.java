@@ -3,38 +3,46 @@ package pl.javasolutions.security.jwt;
 import com.auth0.jwt.interfaces.Claim;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import pl.javasolutions.security.SecurityConfigurationProperties.TokenProperties;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PROTECTED;
 import static pl.javasolutions.security.jwt.TokenService.CLAIMS_ROLES_KEY;
 
 @RequiredArgsConstructor(access = PROTECTED)
-class JwtAuthenticationConverter implements Converter<Jwt, JwtAuthenticationToken> {
+class JwtAuthenticationConverter implements Converter<Jwt, UserDetailsAuthenticationToken> {
 
     private final TokenProperties properties;
 
     @Override
-    public JwtAuthenticationToken convert(final Jwt source) {
+    public UserDetailsAuthenticationToken convert(Jwt source) {
 
-        List<String> roles = Optional.ofNullable(source.getClaim(CLAIMS_ROLES_KEY))
+        Set<String> roles = ofNullable(source.getClaim(CLAIMS_ROLES_KEY))
                 .map(getClaimsFromJwt())
-                .orElseGet(List::of);
+                .map(this::mapAuthorityRoleName)
+                .orElseGet(Set::of);
 
-        if (!roles.isEmpty()) {
-            List<SimpleGrantedAuthority> authorities = getAuthorities(roles);
-            return new JwtAuthenticationToken(source, authorities);
+        AuthenticatedUserDetails authenticatedUserDetails = new AuthenticatedUserDetails(source.getSubject(), roles);
+
+        if (roles.isEmpty()) {
+            Set<String> defaultAuthorityRole = mapAuthorityRoleName(properties.getDefaultRoles());
+            authenticatedUserDetails = authenticatedUserDetails.withAuthorities(defaultAuthorityRole);
         }
 
-        return new JwtAuthenticationToken(source, getAuthorities(properties.getDefaultRoles()));
+        return new UserDetailsAuthenticationToken(authenticatedUserDetails);
+    }
+
+    private Set<String> mapAuthorityRoleName(final List<String> values) {
+        return values.stream()
+                .map(role -> properties.getRolePrefix().toUpperCase() + "_" + role.toUpperCase())
+                .collect(Collectors.toSet());
     }
 
     private Function<Object, List<String>> getClaimsFromJwt() {
@@ -49,11 +57,4 @@ class JwtAuthenticationConverter implements Converter<Jwt, JwtAuthenticationToke
             throw new IllegalArgumentException("claim object is not recognized");
         };
     }
-
-    private List<SimpleGrantedAuthority> getAuthorities(List<String> roles) {
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(properties.getRolePrefix().toUpperCase() + "_" + role.toUpperCase()))
-                .collect(Collectors.toList());
-    }
-
 }

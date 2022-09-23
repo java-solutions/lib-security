@@ -15,6 +15,7 @@ import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_ISSUER;
 import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_TEST_ROLE;
 import static pl.javasolutions.security.samples.Constans.DEFAULT_TOKEN_TYPE;
 import static pl.javasolutions.security.jwt.TokenService.CLAIMS_ROLES_KEY;
+import static pl.javasolutions.security.samples.Constans.DEFAULT_USER_ID;
 
 public class SampleJwtToken {
 
@@ -26,6 +27,7 @@ public class SampleJwtToken {
                 .header(ALG, DEFAULT_TOKEN_ALGORITHM)
                 .header(TYP, DEFAULT_TOKEN_TYPE)
                 .issuer(DEFAULT_TOKEN_ISSUER)
+                .subject(DEFAULT_USER_ID)
                 .issuedAt(DEFAULT_TOKEN_CREATE_DATE.toInstant())
                 .expiresAt(DEFAULT_TOKEN_EXPIRATION_DATE.toInstant())
                 .build();
@@ -38,6 +40,7 @@ public class SampleJwtToken {
                 .issuer(DEFAULT_TOKEN_ISSUER)
                 .issuedAt(DEFAULT_TOKEN_CREATE_DATE.toInstant())
                 .expiresAt(DEFAULT_TOKEN_EXPIRATION_DATE.toInstant())
+                .subject(DEFAULT_USER_ID)
                 .claim(CLAIMS_ROLES_KEY, roles)
                 .build();
     }

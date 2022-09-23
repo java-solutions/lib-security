@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import pl.javasolutions.security.jwt.AuthenticatedUserDetails;
 import pl.javasolutions.security.user.UserDetails;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public class SampleUser {
     }
 
     private static UserDetails createDefaultUserDetails() {
-        return new DefaultUserDetails(DEFAULT_USER_ID, List.of(DEFAULT_TOKEN_TEST_ROLE));
+        return new AuthenticatedUserDetails(DEFAULT_USER_ID, List.of(DEFAULT_TOKEN_TEST_ROLE));
     }
 
     static List<GrantedAuthority> createDefaultGrantedAuthorities() {
